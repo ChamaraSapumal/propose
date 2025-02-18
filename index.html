@@ -3,6 +3,7 @@
 
 <head>
     <title>Will You Marry Me?</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💝</text></svg>">
     <style>
@@ -12,7 +13,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             font-family: 'Comic Sans MS', cursive;
             overflow: hidden;
@@ -21,12 +22,15 @@
         .container {
             text-align: center;
             padding: 20px;
+            width: 90%;
+            max-width: 600px;
         }
 
         h1 {
             color: #ff69b4;
-            font-size: 2.5em;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
             margin-bottom: 30px;
+            word-wrap: break-word;
         }
 
         .buttons {
@@ -34,16 +38,18 @@
             gap: 20px;
             justify-content: center;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         button {
-            padding: 15px 30px;
-            font-size: 1.2em;
+            padding: clamp(10px, 3vw, 15px) clamp(20px, 5vw, 30px);
+            font-size: clamp(1rem, 3vw, 1.2rem);
             border: none;
             border-radius: 25px;
             cursor: pointer;
             transition: transform 0.2s;
             font-family: 'Comic Sans MS', cursive;
+            touch-action: manipulation;
         }
 
         #yesBtn {
@@ -63,7 +69,7 @@
 
         .heart {
             position: absolute;
-            font-size: 24px;
+            font-size: clamp(18px, 5vw, 24px);
             color: #ff69b4;
             pointer-events: none;
             animation: float 3s ease-in-out infinite;
@@ -80,6 +86,16 @@
 
             100% {
                 transform: translateY(0) rotate(360deg);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .buttons {
+                gap: 15px;
+            }
+
+            body {
+                padding: 10px;
             }
         }
     </style>
@@ -100,11 +116,11 @@
         const container = document.querySelector('.container');
         let lastTime = 0;
 
-        // Function to get random position away from mouse
+        // Function to get random position away from mouse/touch
         function getRandomPosition(mouseX, mouseY) {
-            const padding = 50; // Minimum distance from edges
+            const padding = Math.min(50, window.innerWidth * 0.1); // Responsive padding
             const maxAttempts = 10;
-            const minDistance = 200; // Minimum distance from mouse
+            const minDistance = Math.min(200, window.innerWidth * 0.3); // Responsive distance
 
             for (let i = 0; i < maxAttempts; i++) {
                 const x = padding + Math.random() * (window.innerWidth - 2 * padding);
@@ -122,32 +138,34 @@
 
             // If no good position found, force opposite side
             return {
-                x: mouseX < window.innerWidth / 2 ? window.innerWidth - 200 : 200,
-                y: mouseY < window.innerHeight / 2 ? window.innerHeight - 200 : 200
+                x: mouseX < window.innerWidth / 2 ? window.innerWidth - padding : padding,
+                y: mouseY < window.innerHeight / 2 ? window.innerHeight - padding : padding
             };
         }
 
-        // Move the No button when mouse gets close
-        document.addEventListener('mousemove', (e) => {
-            const currentTime = Date.now();
-            if (currentTime - lastTime < 100) return; // Limit update rate
-            lastTime = currentTime;
+        // Handle both mouse and touch events
+        ['mousemove', 'touchmove'].forEach(eventType => {
+            document.addEventListener(eventType, (e) => {
+                const currentTime = Date.now();
+                if (currentTime - lastTime < 100) return; // Limit update rate
+                lastTime = currentTime;
 
-            const noBtnRect = noBtn.getBoundingClientRect();
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
+                const noBtnRect = noBtn.getBoundingClientRect();
+                const mouseX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+                const mouseY = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
 
-            const distance = Math.sqrt(
-                Math.pow(mouseX - (noBtnRect.left + noBtnRect.width / 2), 2) +
-                Math.pow(mouseY - (noBtnRect.top + noBtnRect.height / 2), 2)
-            );
+                const distance = Math.sqrt(
+                    Math.pow(mouseX - (noBtnRect.left + noBtnRect.width / 2), 2) +
+                    Math.pow(mouseY - (noBtnRect.top + noBtnRect.height / 2), 2)
+                );
 
-            if (distance < 150) {
-                noBtn.style.position = 'fixed';
-                const newPos = getRandomPosition(mouseX, mouseY);
-                noBtn.style.left = newPos.x + 'px';
-                noBtn.style.top = newPos.y + 'px';
-            }
+                if (distance < Math.min(150, window.innerWidth * 0.25)) {
+                    noBtn.style.position = 'fixed';
+                    const newPos = getRandomPosition(mouseX, mouseY);
+                    noBtn.style.left = newPos.x + 'px';
+                    noBtn.style.top = newPos.y + 'px';
+                }
+            });
         });
 
         // Create floating hearts
