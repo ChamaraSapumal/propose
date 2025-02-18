@@ -47,7 +47,7 @@ _Note: Add your own demo GIF to showcase the interaction_
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/proposal-page.git
+   git clone https://github.com/yourusername/propose.git
    ```
 
 2. **Open in browser**
