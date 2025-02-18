@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Will You Marry Me?</title>
+    <style>
+        body {
+            background-color: #ffe6f2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Comic Sans MS', cursive;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #ff69b4;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-family: 'Comic Sans MS', cursive;
+        }
+
+        #yesBtn {
+            background-color: #ff69b4;
+            color: white;
+        }
+
+        #noBtn {
+            background-color: #ff99cc;
+            color: white;
+            transition: all 0.05s ease;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 24px;
+            color: #ff69b4;
+            pointer-events: none;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+
+            100% {
+                transform: translateY(0) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Will You Marry Me? 💝</h1>
+        <div class="buttons">
+            <button id="yesBtn">Yes 💖</button>
+            <button id="noBtn">No 💔</button>
+        </div>
+    </div>
+
+    <script>
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const container = document.querySelector('.container');
+        let lastTime = 0;
+
+        // Function to get random position away from mouse
+        function getRandomPosition(mouseX, mouseY) {
+            const padding = 50; // Minimum distance from edges
+            const maxAttempts = 10;
+            const minDistance = 200; // Minimum distance from mouse
+
+            for (let i = 0; i < maxAttempts; i++) {
+                const x = padding + Math.random() * (window.innerWidth - 2 * padding);
+                const y = padding + Math.random() * (window.innerHeight - 2 * padding);
+
+                const distance = Math.sqrt(
+                    Math.pow(x - mouseX, 2) +
+                    Math.pow(y - mouseY, 2)
+                );
+
+                if (distance > minDistance) {
+                    return { x, y };
+                }
+            }
+
+            // If no good position found, force opposite side
+            return {
+                x: mouseX < window.innerWidth / 2 ? window.innerWidth - 200 : 200,
+                y: mouseY < window.innerHeight / 2 ? window.innerHeight - 200 : 200
+            };
+        }
+
+        // Move the No button when mouse gets close
+        document.addEventListener('mousemove', (e) => {
+            const currentTime = Date.now();
+            if (currentTime - lastTime < 100) return; // Limit update rate
+            lastTime = currentTime;
+
+            const noBtnRect = noBtn.getBoundingClientRect();
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            const distance = Math.sqrt(
+                Math.pow(mouseX - (noBtnRect.left + noBtnRect.width / 2), 2) +
+                Math.pow(mouseY - (noBtnRect.top + noBtnRect.height / 2), 2)
+            );
+
+            if (distance < 150) {
+                noBtn.style.position = 'fixed';
+                const newPos = getRandomPosition(mouseX, mouseY);
+                noBtn.style.left = newPos.x + 'px';
+                noBtn.style.top = newPos.y + 'px';
+            }
+        });
+
+        // Create floating hearts
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.innerHTML = '💖';
+            heart.style.left = Math.random() * window.innerWidth + 'px';
+            heart.style.top = window.innerHeight + 'px';
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, 3000);
+        }
+
+        // Yes button click handler
+        yesBtn.addEventListener('click', () => {
+            document.body.style.backgroundColor = '#ffb6c1';
+            container.innerHTML = '<h1>Yaaay! I knew u love me 💝</h1>';
+
+            // Create hearts
+            for (let i = 0; i < 20; i++) {
+                setTimeout(createHeart, i * 150);
+            }
+
+            // Show final messages after 5 seconds
+            setTimeout(() => {
+                container.innerHTML = `
+                    <h1>But I can\'t marry u because</h1>
+                `;
+                setTimeout(() => {
+                    container.innerHTML += `
+                        <h1>මම තාම අම්මගෙන් ඉල්ලගෙන phone එකට reload එකක් දාගන්නේ 😅</h1>`;
+                }, 1500);
+            }, 5000);
+        });
+    </script>
+</body>
+
+</html>
